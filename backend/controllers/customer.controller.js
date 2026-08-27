@@ -122,7 +122,44 @@ const loginCustomer = async (req, res) => {
     }
 };
 
+// Controller to get the profile of the currently logged-in customer
+const getMyProfile = async (req, res) => {
+    try {
+        // req.user is set by the protect middleware
+        return res.status(200).json(req.user);
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Server error, please try again later.',
+            error: error.message
+        });
+    }
+};
+
+// Controller to log out a customer
+const logoutCustomer = async (req, res) => {
+    try {
+        // Clear the HttpOnly token cookie
+        res.clearCookie('token', {
+            httpOnly: true
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Logged out successfully'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Server error, please try again later.',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     registerCustomer,
-    loginCustomer
+    loginCustomer,
+    getMyProfile,
+    logoutCustomer
 };
