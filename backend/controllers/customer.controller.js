@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const Customer = require('../models/customer.model');
+const generateToken = require('../utils/generateToken');
 
 // Controller for registering a new customer
 const registerCustomer = async (req, res) => {
@@ -65,6 +66,63 @@ const registerCustomer = async (req, res) => {
     }
 };
 
+// Controller for logging in a customer
+const loginCustomer = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // 1. Validate that both email and password are provided
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email and password are required.'
+            });
+        }
+
+        // 2. Find the customer by email
+        const customer = await Customer.findOne({ email });
+        if (!customer) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password.'
+            });
+        }
+
+        // 3. Compare the entered password with the hashed password stored in the database
+        const isMatch = await bcrypt.compare(password, customer.password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password.'
+            });
+        }
+
+        // 4. Generate JWT
+        const token = generateToken(customer._id);
+
+        // 5. Store JWT inside an HttpOnly cookie
+        res.cookie('token', token, {
+            httpOnly: true, // Prevents client-side scripts from reading the cookie
+            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        });
+
+        // 6. Return successful response
+        return res.status(200).json({
+            success: true,
+            message: 'Login successful'
+        });
+
+    } catch (error) {
+        // 7. Catch any unexpected server errors
+        return res.status(500).json({
+            success: false,
+            message: 'Server error, please try again later.',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
-    registerCustomer
+    registerCustomer,
+    loginCustomer
 };
