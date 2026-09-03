@@ -1,29 +1,35 @@
-# ShopKart — Customer Authentication Service
+# ShopKart — Full-Stack Customer Authentication System
 
-A simple, beginner-friendly Node.js, Express, and MongoDB backend for **ShopKart**, implementing customer authentication using JSON Web Tokens (JWT) and HttpOnly cookies. Built for Engineering Lab 01 / Web Development Lab.
+A simple, beginner-friendly full-stack web application for **ShopKart**, featuring a **Node.js, Express & MongoDB backend** (Lab 01) integrated with a **React (Vite) frontend** (Lab 02). Implements secure customer registration, login, protected home profile access, and logout using JSON Web Tokens (JWT) stored in `HttpOnly` cookies.
 
 ---
 
 ## Project Overview
 
-ShopKart Customer Authentication Service provides a complete authentication flow for online shoppers:
+ShopKart Customer Authentication System provides an end-to-end authentication flow:
 * **Node.js & Express.js**: RESTful web server framework.
 * **MongoDB & Mongoose**: Document database and Object Data Modeling (ODM).
-* **Customer Authentication System**: Registration, login, profile access, and logout.
-* **JWT-Based Authentication**: Secure session identification using signed JSON Web Tokens.
-* **HttpOnly Cookie Storage**: Cookie-based session management to protect against client-side script access.
+* **React & React Router DOM**: Client-side single-page application (SPA) with controlled form components and routing.
+* **Axios API Service**: Configured with `withCredentials: true` to seamlessly transmit authentication cookies.
+* **JWT & HttpOnly Cookie Storage**: Secure session management protecting tokens from client-side script access (`document.cookie`).
+* **Protected Routes**: `/home` verifies the authenticated customer via `GET /customers/me` on component load.
 
 ---
 
 ## Tech Stack
 
-* **Runtime Environment**: Node.js
-* **Web Framework**: Express.js (`^5.2.1`)
+### Backend (Lab 01)
+* **Runtime**: Node.js
+* **Framework**: Express.js (`^5.2.1`)
 * **Database & ODM**: MongoDB / Mongoose (`^9.9.4`)
-* **Password Hashing**: bcrypt (`^6.0.0`)
-* **Token Authentication**: jsonwebtoken (`^9.0.3`)
-* **Cookie Parsing**: cookie-parser (`^1.4.7`)
-* **Environment Configuration**: dotenv (`^17.4.2`)
+* **Security & Auth**: bcrypt (`^6.0.0`), jsonwebtoken (`^9.0.3`), cookie-parser (`^1.4.7`), cors (`^2.8.6`)
+* **Environment**: dotenv (`^17.4.2`)
+
+### Frontend (Lab 02)
+* **Framework**: React (`^19.2.8`) via Vite (`^8.2.2`)
+* **Routing**: React Router DOM (`^7.18.3`)
+* **HTTP Client**: Axios (`^1.20.0`)
+* **Styling**: Vanilla CSS
 
 ---
 
@@ -34,81 +40,130 @@ ShopKart/
 ├── .gitignore
 ├── README.md
 ├── LICENSE
-└── backend/
-    ├── controllers/
-    │   └── customer.controller.js  # Request handlers and business logic
-    ├── middlewares/
-    │   └── auth.middleware.js      # JWT authentication guard middleware
-    ├── models/
-    │   └── customer.model.js       # Customer database schema definition
-    ├── routes/
-    │   └── customer.routes.js      # Endpoint route definitions
-    ├── utils/
-    │   └── generateToken.js        # JWT generation helper utility
-    ├── .env.example                # Environment variable template
-    ├── index.js                    # Server entry point & DB connection
-    ├── package.json                # Dependencies and project metadata
-    └── package-lock.json           # Locked dependency tree
+├── backend/
+│   ├── controllers/
+│   │   └── customer.controller.js  # Request handlers & authentication logic
+│   ├── middlewares/
+│   │   └── auth.middleware.js      # JWT verification middleware for protected routes
+│   ├── models/
+│   │   └── customer.model.js       # Customer database schema definition
+│   ├── routes/
+│   │   └── customer.routes.js      # Customer API route definitions
+│   ├── utils/
+│   │   └── generateToken.js        # JWT signing utility
+│   ├── .env                        # Local environment configuration (git-ignored)
+│   ├── .env.example                # Environment variable reference template
+│   ├── index.js                    # Express server entry point & MongoDB connection
+│   └── package.json                # Backend dependencies and scripts
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   └── Navbar.jsx          # Top navigation bar with ShopKart logo, Home link & Logout
+    │   ├── pages/
+    │   │   ├── Register.jsx        # Registration form (/register)
+    │   │   ├── Login.jsx           # Login form (/login)
+    │   │   └── Home.jsx            # Protected customer profile page (/home)
+    │   ├── services/
+    │   │   └── api.js              # Axios instance configured with withCredentials: true
+    │   ├── App.jsx                 # Main application router setup
+    │   ├── index.css               # Global application styling
+    │   └── main.jsx                # React DOM entry point
+    ├── index.html                  # HTML template
+    ├── vite.config.js              # Vite configuration
+    └── package.json                # Frontend dependencies and scripts
 ```
 
 ---
 
-## Setup Instructions
+## Setup & Installation Instructions
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/TheVicky1/ShopKart.git
 cd ShopKart
 ```
 
-### 2. Navigate to Backend Directory
-```bash
-cd backend
-```
+---
 
-### 3. Install Dependencies
-```bash
-npm install
-```
+### 2. Backend Setup (Lab 01)
 
-### 4. Create Environment File
-Create a `.env` file in the `backend/` directory by copying `.env.example`:
-```bash
-cp .env.example .env
-```
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-Edit `.env` and configure your environment variables:
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster-host>/?appName=ShopKart
-JWT_SECRET=your_jwt_secret_key
-```
+2. Install backend dependencies:
+   ```bash
+   npm install
+   ```
 
-> **Security Note**: Never commit your real `.env` file or database credentials to GitHub. The `.gitignore` file ensures `.env` stays local.
+3. Create the environment configuration file:
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Ensure `.env` contains:
+   ```env
+   PORT=5000
+   MONGO_URI=mongodb://127.0.0.1:27017/shopkart
+   JWT_SECRET=your_secret_key
+   ```
+
+4. Start the backend server:
+   ```bash
+   node index.js
+   ```
+   *(Server will connect to MongoDB and run on `http://localhost:5000`)*.
 
 ---
 
-## How to Start the Backend
+### 3. Frontend Setup (Lab 02)
 
-Run the server from the `backend` directory:
-```bash
-cd backend
-node index.js
+1. Open a new terminal and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   *(Frontend app will run on `http://localhost:5173`)*.
+
+---
+
+## Application User Flow
+
+```text
+Registration Flow:
+/register → Fill Form (Name, Email, Password, Phone) → POST /customers/register → Redirect to /login
+
+Login Flow:
+/login → Enter Credentials → POST /customers/login → Backend sets HttpOnly 'token' cookie → Redirect to /home
+
+Protected Home Flow:
+/home → GET /customers/me (with Cookie) → Backend verifies JWT → Returns Profile Data → Render Welcome Card
+(If unauthenticated or 401 error → Redirect to /login)
+
+Logout Flow:
+Click Logout → POST /customers/logout → Backend clears 'token' cookie → Redirect to /login
 ```
-
-Upon starting, the server initializes the MongoDB connection and listens on the configured `PORT` (default: 5000).
 
 ---
 
 ## API Documentation
 
-All customer routes are prefixed with `/customers`.
+All backend customer endpoints are prefixed with `/customers`.
 
-### 1. Register Customer
+### 1. Customer Registration
 * **HTTP Method**: `POST`
 * **Endpoint**: `/customers/register`
-* **Purpose**: Registers a new customer account.
-* **Authentication Required**: No (Public)
+* **Access**: Public
 * **Request Body**:
   ```json
   {
@@ -131,18 +186,13 @@ All customer routes are prefixed with `/customers`.
     }
   }
   ```
-* **Error Responses**:
-  * `400 Bad Request`: Missing required fields or password shorter than 6 characters.
-  * `409 Conflict`: Email address is already registered.
-  * `500 Internal Server Error`: Database error.
 
 ---
 
 ### 2. Customer Login
 * **HTTP Method**: `POST`
 * **Endpoint**: `/customers/login`
-* **Purpose**: Authenticates customer credentials and issues an HttpOnly cookie containing a JWT.
-* **Authentication Required**: No (Public)
+* **Access**: Public
 * **Request Body**:
   ```json
   {
@@ -158,19 +208,13 @@ All customer routes are prefixed with `/customers`.
   }
   ```
   *(Sets an `HttpOnly` cookie named `token` valid for 1 day).*
-* **Error Responses**:
-  * `400 Bad Request`: Missing email or password.
-  * `401 Unauthorized`: Invalid email or password.
-  * `500 Internal Server Error`: Database error.
 
 ---
 
-### 3. Get Protected Profile
+### 3. Get Authenticated Profile
 * **HTTP Method**: `GET`
 * **Endpoint**: `/customers/me`
-* **Purpose**: Retrieves the profile details of the logged-in customer.
-* **Authentication Required**: Yes (Requires valid `token` cookie)
-* **Request Body**: None
+* **Access**: Protected (Requires valid `token` cookie)
 * **Success Response (`200 OK`)**:
   ```json
   {
@@ -178,21 +222,16 @@ All customer routes are prefixed with `/customers`.
     "fullName": "Vicky Patel",
     "email": "vicky@example.com",
     "phone": "9876543210",
-    "createdAt": "2026-08-31T08:50:00.000Z"
+    "createdAt": "2026-09-03T07:14:48.355Z"
   }
   ```
-* **Error Responses**:
-  * `401 Unauthorized`: Missing, invalid, or expired JWT cookie, or user no longer exists.
-  * `500 Internal Server Error`: Server error.
 
 ---
 
 ### 4. Customer Logout
 * **HTTP Method**: `POST`
 * **Endpoint**: `/customers/logout`
-* **Purpose**: Clears the authentication `token` cookie to log out the customer.
-* **Authentication Required**: Yes (Requires valid `token` cookie)
-* **Request Body**: None
+* **Access**: Protected
 * **Success Response (`200 OK`)**:
   ```json
   {
@@ -200,113 +239,34 @@ All customer routes are prefixed with `/customers`.
     "message": "Logged out successfully"
   }
   ```
-* **Error Responses**:
-  * `401 Unauthorized`: No active session token found.
-  * `500 Internal Server Error`: Server error.
-
----
-
-## Authentication Flow
-
-```text
-1. Registration Flow:
-   Client Request → Register Endpoint → Validate Fields → Hash Password (bcrypt) → Save to MongoDB → Return User Details (No Password)
-
-2. Login Flow:
-   Client Request → Login Endpoint → Find User by Email → Verify Password (bcrypt.compare) → Generate JWT (jwt.sign) → Set HttpOnly Cookie → Return Success
-
-3. Protected Request Flow:
-   Client Request (with Cookie) → Auth Middleware → Read 'token' Cookie → Verify JWT (jwt.verify) → Extract ID → Query Customer.findById() → Attach to req.user → Controller Returns Profile
-
-4. Logout Flow:
-   Client Request → Auth Middleware (Verify Token) → Logout Controller → Clear 'token' Cookie (res.clearCookie) → Return Success
-```
+  *(Clears the `token` cookie).*
 
 ---
 
 ## Security Practices Implemented
 
-* **Bcrypt Password Hashing**: Passwords are saved only as secure bcrypt hashes generated with a salt factor of 10 (`bcrypt.hash()`). Plain-text passwords are never stored.
-* **Password Exclusion**: Plain-text passwords and hash strings are excluded from API responses (`.select('-password')`).
-* **Minimal JWT Payload**: The JWT payload contains only the MongoDB user ID (`{ id: customer._id }`). No sensitive data is placed in the payload.
-* **Environment-Based Secret**: The JWT signing key is loaded securely from `process.env.JWT_SECRET`.
-* **Token Expiration**: JWT tokens expire after 24 hours (`1d`).
-* **HttpOnly Cookie Storage**: The JWT token is sent via `res.cookie('token', token, { httpOnly: true, maxAge: 24*60*60*1000 })`. `httpOnly: true` prevents client-side JavaScript (`document.cookie`) from accessing the session token, mitigating Cross-Site Scripting (XSS) attacks.
-* **Protected Routes Guard**: Sensitive endpoints (`/customers/me`, `/customers/logout`) are guarded by `auth.middleware.js`.
-* **Git Security**: Sensitive `.env` files and `node_modules/` are ignored in `.gitignore`.
-
----
-
-## MVC Architecture Overview
-
-The backend uses a standard Model-View-Controller (MVC) organization:
-
-* **Models (`models/customer.model.js`)**: Defines the data structure, data types, validation rules, and schema for MongoDB documents using Mongoose.
-* **Controllers (`controllers/customer.controller.js`)**: Handles HTTP requests, executes business logic (field validation, hashing, database operations, cookie setting), and returns HTTP responses.
-* **Routes (`routes/customer.routes.js`)**: Defines URL endpoints and maps them to their respective controller functions and middlewares.
-* **Middlewares (`middlewares/auth.middleware.js`)**: Intercepts requests before controllers to perform authentication checks and populate `req.user`.
-* **Utilities (`utils/generateToken.js`)**: Contains reusable helper functions (e.g., signing JWT tokens).
-
----
-
-## Postman / API Testing Guide
-
-### 1. Test Registration
-* **POST** `http://localhost:5000/customers/register`
-* **Headers**: `Content-Type: application/json`
-* **Body (raw JSON)**:
-  ```json
-  {
-    "fullName": "Vicky Patel",
-    "email": "vicky@example.com",
-    "password": "password123",
-    "phone": "9876543210"
-  }
-  ```
-
-### 2. Test Login
-* **POST** `http://localhost:5000/customers/login`
-* **Headers**: `Content-Type: application/json`
-* **Body (raw JSON)**:
-  ```json
-  {
-    "email": "vicky@example.com",
-    "password": "password123"
-  }
-  ```
-* **Verify**: In Postman, check the **Cookies** tab under the response pane to confirm that the `token` cookie was set with `HttpOnly` enabled.
-
-### 3. Test Get Profile
-* **GET** `http://localhost:5000/customers/me`
-* **Verify**: Ensure the profile details return with status `200 OK` and exclude the password hash.
-
-### 4. Test Logout
-* **POST** `http://localhost:5000/customers/logout`
-* **Verify**: Status `200 OK`. Then attempt `GET /customers/me` again to verify it now returns `401 Unauthorized`.
+* **Bcrypt Password Hashing**: Passwords are saved as bcrypt hashes using a salt factor of 10 (`bcrypt.hash()`). Plain-text passwords are never stored.
+* **Password Exclusion**: Passwords are excluded from database queries and API responses (`.select('-password')`).
+* **HttpOnly Cookie Storage**: JWT tokens are sent via `res.cookie('token', token, { httpOnly: true, maxAge: 86400000 })`. `httpOnly: true` prevents client-side scripts from reading session tokens, defending against XSS attacks.
+* **No Client Token Storage**: Frontend does not store JWT tokens in `localStorage` or `sessionStorage`.
+* **CORS Credentials Configuration**: Backend enables CORS with `origin: true` and `credentials: true`, allowing cross-origin cookie authentication.
+* **Protected Routes Guard**: Express `auth.middleware.js` verifies the JWT cookie on protected endpoints (`/customers/me`, `/customers/logout`).
+* **Environment Protection**: `.env` containing database secrets is ignored by Git (`.gitignore`).
 
 ---
 
 ## Viva & Learning Notes
 
-* **What is JWT?**: A JSON Web Token is an open standard (RFC 7519) for securely transmitting information between parties as a JSON object. It consists of Header, Payload, and Signature.
-* **What are HttpOnly Cookies?**: A cookie attribute that restricts JavaScript from accessing the cookie via `document.cookie`. This helps defend against Cross-Site Scripting (XSS) attacks.
-* **Why use bcrypt?**: Bcrypt is a salted password hashing function that introduces computational cost (work factor) to slow down brute-force and dictionary attacks.
-* **What is Express Middleware?**: Functions that execute during the request-response lifecycle. Middleware functions can inspect/modify requests (`req`), send responses (`res`), or invoke `next()` to pass control forward.
-* **What is Mongoose?**: An Object Data Modeling (ODM) library for MongoDB and Node.js. It manages relationships, schema validation, and database operations.
-* **Why exclude password fields in responses?**: Returning password hashes exposes internal security mechanisms and increases risk during client-side data leaks or logging.
+* **What is React?**: A JavaScript library for building component-based user interfaces.
+* **Controlled Components**: Form elements whose values are tied to React state (`useState`) and updated via input handlers (`onChange`).
+* **`useState`**: React hook for maintaining local component state (e.g. form inputs, error messages, user details).
+* **`useEffect`**: React hook for executing side effects (e.g. calling `GET /customers/me` when the Home page mounts).
+* **`useNavigate`**: React Router hook used for client-side navigation between pages (e.g., redirecting to `/login` after register or logout).
+* **`withCredentials: true`**: Axios setting that ensures cross-origin requests send cookies along with HTTP requests.
+* **Why use HttpOnly Cookies over `localStorage`?**: `localStorage` is accessible by any client-side JavaScript, exposing tokens to Cross-Site Scripting (XSS). `HttpOnly` cookies are unreadable by JavaScript (`document.cookie`), keeping session tokens secure.
 
 ---
 
-## Git & Version Control
+## License
 
-* `.env` contains local environment variables and database credentials. It is listed in `.gitignore` and **must never be committed**.
-* `node_modules/` contains downloaded package files and is ignored by Git.
-* `.env.example` is committed as a reference template showing required variable names without disclosing actual secrets.
-
----
-
-## Database Note
-
-The application connects to MongoDB using the `MONGO_URI` environment variable defined in `.env`.
-* **Local MongoDB**: `mongodb://127.0.0.1:27017/shopkart` (requires local MongoDB service running).
-* **MongoDB Atlas**: `mongodb+srv://<user>:<password>@<cluster>.mongodb.net/?appName=ShopKart` (requires configured Atlas cluster, valid database user credentials, and current IP address added to Atlas Network Access whitelist).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
