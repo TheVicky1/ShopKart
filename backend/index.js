@@ -4,10 +4,17 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const customerRoutes = require('./routes/customer.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Enable CORS for credentials (cookies)
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 
 // Middleware for parsing JSON requests
 app.use(express.json());
