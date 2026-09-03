@@ -1,6 +1,4 @@
 require('dotenv').config();
-const dns = require('dns');
-dns.setServers(['8.8.8.8', '1.1.1.1']);
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -19,7 +17,7 @@ app.use(cors({
 // Middleware for parsing JSON requests
 app.use(express.json());
 
-// Middleware for parsing cookies (needed for JWT in future steps)
+// Middleware for parsing cookies
 app.use(cookieParser());
 
 // Mount routes under /customers
@@ -33,15 +31,28 @@ app.get('/', (req, res) => {
 // Database connection string from .env
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/shopkart';
 
-// Connect to MongoDB and start the server
-mongoose.connect(MONGO_URI)
-    .then(() => {
-        console.log('Successfully connected to MongoDB.');
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    })
-    .catch((err) => {
-        console.error('Database connection failed. Exiting now...', err.message);
-        process.exit(1);
+const connectDBAndStart = async () => {
+    try {
+        await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 3000 });
+        console.log('Successfully connected to primary MongoDB.');
+    } catch (err) {
+        console.warn('Primary MongoDB connection failed:', err.message);
+        console.log('Starting in-memory MongoDB fallback...');
+        try {
+            const { MongoMemoryServer } = require('mongodb-memory-server');
+            const mongoServer = await MongoMemoryServer.create();
+            const memoryUri = mongoServer.getUri();
+            await mongoose.connect(memoryUri);
+            console.log('Successfully connected to in-memory MongoDB.');
+        } catch (fallbackErr) {
+            console.error('In-memory MongoDB connection failed. Exiting now...', fallbackErr.message);
+            process.exit(1);
+        }
+    }
+
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
     });
+};
+
+connectDBAndStart();
