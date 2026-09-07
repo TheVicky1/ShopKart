@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const customerRoutes = require('./routes/customer.routes');
+const productRoutes = require('./routes/product.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,9 @@ app.use(cookieParser());
 
 // Mount routes under /customers
 app.use('/customers', customerRoutes);
+
+// Mount routes under /products
+app.use('/products', productRoutes);
 
 // Basic root route
 app.get('/', (req, res) => {
