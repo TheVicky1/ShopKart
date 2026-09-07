@@ -11,4 +11,9 @@ export const getProducts = (params) => {
   return api.get('/products', { params });
 };
 
+// Helper function to fetch a single product by ID
+export const getProductById = (id) => {
+  return api.get(`/products/${id}`);
+};
+
 export default api;
