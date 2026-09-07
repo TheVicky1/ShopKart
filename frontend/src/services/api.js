@@ -6,4 +6,9 @@ const api = axios.create({
   withCredentials: true
 });
 
+// Helper function to fetch products with query parameters (search, category)
+export const getProducts = (params) => {
+  return api.get('/products', { params });
+};
+
 export default api;
