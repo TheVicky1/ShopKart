@@ -40,7 +40,7 @@ function Login() {
 
       // Navigate to /home on successful login
       navigate('/home');
-    } catch (err) {
+    } catch {
       // Requirement: On failure show "Invalid Credentials"
       setError('Invalid Credentials');
     } finally {

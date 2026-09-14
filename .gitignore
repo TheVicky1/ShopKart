@@ -1,2 +1,21 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment files
 .env
+.env.*
+!.env.example
+
+# Dependency directories
 node_modules/
+
+# Build outputs
+dist/
+dist-ssr/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store

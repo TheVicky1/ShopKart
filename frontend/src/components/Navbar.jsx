@@ -11,7 +11,7 @@ function Navbar() {
       await api.post('/customers/logout');
       // Redirect to login page
       navigate('/login');
-    } catch (err) {
+    } catch {
       // Navigate to login even if logout API fails or session expired
       navigate('/login');
     }

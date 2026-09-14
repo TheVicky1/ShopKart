@@ -14,7 +14,7 @@ function Home() {
       try {
         const response = await api.get('/customers/me');
         setUser(response.data);
-      } catch (err) {
+      } catch {
         // If authentication fails (401), navigate to login
         navigate('/login');
       } finally {

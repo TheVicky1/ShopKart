@@ -1,272 +1,237 @@
-# ShopKart — Full-Stack Customer Authentication System
+# ShopKart — Full-Stack Customer Portal & Authentication System 🛒
 
-A simple, beginner-friendly full-stack web application for **ShopKart**, featuring a **Node.js, Express & MongoDB backend** (Lab 01) integrated with a **React (Vite) frontend** (Lab 02). Implements secure customer registration, login, protected home profile access, and logout using JSON Web Tokens (JWT) stored in `HttpOnly` cookies.
+> **Production-grade decoupled full-stack application featuring a Node.js, Express 5 & MongoDB backend paired with a React 19 & Vite 8 frontend, implementing secure JWT authentication stored in `HttpOnly` cookies.**
 
----
-
-## Project Overview
-
-ShopKart Customer Authentication System provides an end-to-end authentication flow:
-* **Node.js & Express.js**: RESTful web server framework.
-* **MongoDB & Mongoose**: Document database and Object Data Modeling (ODM).
-* **React & React Router DOM**: Client-side single-page application (SPA) with controlled form components and routing.
-* **Axios API Service**: Configured with `withCredentials: true` to seamlessly transmit authentication cookies.
-* **JWT & HttpOnly Cookie Storage**: Secure session management protecting tokens from client-side script access (`document.cookie`).
-* **Protected Routes**: `/home` verifies the authenticated customer via `GET /customers/me` on component load.
+[![React Version](https://img.shields.io/badge/React-19.2.8-blue?logo=react)](https://react.dev)
+[![Vite Version](https://img.shields.io/badge/Vite-8.2.2-646CFF?logo=vite)](https://vite.dev)
+[![Express Version](https://img.shields.io/badge/Express-5.2.1-000000?logo=express)](https://expressjs.com)
+[![MongoDB Version](https://img.shields.io/badge/MongoDB-9.9.4-47A248?logo=mongodb)](https://www.mongodb.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](docs/CONTRIBUTING.md)
 
 ---
 
-## Tech Stack
+## 📌 What is ShopKart?
 
-### Backend (Lab 01)
-* **Runtime**: Node.js
-* **Framework**: Express.js (`^5.2.1`)
-* **Database & ODM**: MongoDB / Mongoose (`^9.9.4`)
-* **Security & Auth**: bcrypt (`^6.0.0`), jsonwebtoken (`^9.0.3`), cookie-parser (`^1.4.7`), cors (`^2.8.6`)
-* **Environment**: dotenv (`^17.4.2`)
-
-### Frontend (Lab 02)
-* **Framework**: React (`^19.2.8`) via Vite (`^8.2.2`)
-* **Routing**: React Router DOM (`^7.18.3`)
-* **HTTP Client**: Axios (`^1.20.0`)
-* **Styling**: Vanilla CSS
+**ShopKart** is an open-source full-stack customer authentication and product catalog platform. Designed around security best practices, ShopKart isolates authentication tokens inside `HttpOnly` browser cookies, preventing client-side script access (`document.cookie`) and mitigating Cross-Site Scripting (XSS) attacks. The platform seamlessly integrates customer registration, login verification, protected profile sessions, product catalog browsing, and session invalidation.
 
 ---
 
-## Project Structure
+## ✨ Key Features
+
+- 🔐 **Secure JWT Session Management**: Tokens signed with 1-day expiration and delivered via `HttpOnly` cookies.
+- 🔑 **Bcrypt Password Security**: Passwords hashed using bcrypt (10 salt rounds) prior to storage; omitted from queries (`.select('-password')`).
+- 🛡️ **Protected Route Middleware**: Server-side Express middleware (`auth.middleware.js`) verifying token signature before returning protected profile data.
+- 🛍️ **E-Commerce Product Catalog**: Search, filter by category, view product stock status, and inspect detailed product views.
+- ⚛️ **React 19 Controlled Components**: Responsive forms managed via `useState`, client-side routing via React Router 7, and component lifecycle handlers.
+- 🌐 **Automated Axios Cookie Delivery**: Configured with `withCredentials: true` for automatic cross-origin cookie transmission.
+
+---
+
+## 🏗️ Architecture & Authentication Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Customer as Customer Browser
+    participant React as React 19 SPA (Frontend:5173)
+    participant Axios as Axios Service (withCredentials)
+    participant Express as Express 5 API (Backend:5000)
+    participant AuthMW as auth.middleware.js
+    participant Mongo as MongoDB Database
+
+    %% Registration
+    Customer->>React: Fill /register Form
+    React->>Axios: POST /customers/register {fullName, email, password, phone}
+    Axios->>Express: Send JSON Payload
+    Express->>Mongo: Save Customer with Bcrypt Hashed Password
+    Mongo-->>Express: Return Customer Record
+    Express-->>Customer: 201 Created
+
+    %% Login
+    Customer->>React: Fill /login Form
+    React->>Axios: POST /customers/login {email, password}
+    Axios->>Express: Send Credentials
+    Express->>Mongo: Find Customer by email
+    Express->>Express: Verify Bcrypt Hash & Sign JWT
+    Express-->>Customer: 200 OK + Set-Cookie: token (HttpOnly, maxAge=1d)
+
+    %% Profile Verification
+    Customer->>React: Navigate to /home
+    React->>Axios: GET /customers/me
+    Axios->>Express: Send GET with HttpOnly Cookie
+    Express->>AuthMW: Verify JWT Token
+    AuthMW->>Mongo: Fetch Profile (.select('-password'))
+    Express-->>Customer: 200 OK {fullName, email, phone}
+    Customer->>React: Render Welcome Dashboard
+
+    %% Logout
+    Customer->>React: Click Logout
+    React->>Axios: POST /customers/logout
+    Express-->>Customer: 200 OK + Clear Cookie
+    Customer->>React: Redirect to /login
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Backend Runtime** | [Node.js](https://nodejs.org) | Asynchronous JavaScript runtime environment |
+| **Backend Framework** | [Express 5.2](https://expressjs.com) | RESTful API server framework |
+| **Database & ODM** | [MongoDB](https://mongodb.com) / [Mongoose 9.9](https://mongoosejs.com) | NoSQL document database & ODM schema modeling |
+| **Auth & Encryption** | `bcrypt`, `jsonwebtoken`, `cookie-parser` | Salted password hashing, JWT signing, cookie parsing |
+| **Frontend Framework** | [React 19.2](https://react.dev) | UI component library with hooks (`useState`, `useEffect`) |
+| **Build Tooling** | [Vite 8.2](https://vite.dev) | Lightning-fast HMR dev server & production bundler |
+| **Client Routing** | [React Router 7.18](https://reactrouter.com) | Client-side page navigation & protected route redirects |
+| **HTTP Client** | [Axios 1.20](https://axios-http.com) | HTTP client configured with `withCredentials: true` |
+| **Static Analysis** | [Oxlint 1.79](https://oxc.rs) | High-speed JavaScript/JSX code linter |
+
+---
+
+## 📂 Project Structure
 
 ```text
 ShopKart/
-├── .gitignore
-├── README.md
-├── LICENSE
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md         # Standardized bug reporting form
+│   │   └── feature_request.md    # Feature proposal template
+│   ├── workflows/
+│   │   └── ci.yml                # Automated backend & frontend GitHub Actions CI
+│   ├── CODEOWNERS                # Maintainer code ownership definitions
+│   ├── PULL_REQUEST_TEMPLATE.md  # Contributor PR submission checklist
+│   └── dependabot.yml            # Automated dependency update configuration
+├── docs/
+│   ├── GETTING_STARTED.md        # Step-by-step setup and local running guide
+│   ├── ARCHITECTURE.md           # Sequence flow, module breakdown & database schema
+│   ├── DEVELOPMENT.md            # Developer commands, linting & build scripts
+│   ├── CONTRIBUTING.md           # Contributor guidelines and workflow
+│   ├── SECURITY.md               # Session security safeguards & vulnerability reporting
+│   └── FAQ.md                    # Frequently asked technical questions
 ├── backend/
 │   ├── controllers/
-│   │   └── customer.controller.js  # Request handlers & authentication logic
+│   │   ├── customer.controller.js # Auth request handlers (register, login, me, logout)
+│   │   └── product.controller.js  # Product catalog request handlers
 │   ├── middlewares/
-│   │   └── auth.middleware.js      # JWT verification middleware for protected routes
+│   │   └── auth.middleware.js     # JWT cookie verification middleware
 │   ├── models/
-│   │   └── customer.model.js       # Customer database schema definition
+│   │   ├── customer.model.js      # Customer Mongoose schema
+│   │   └── product.model.js       # Product Mongoose schema
 │   ├── routes/
-│   │   └── customer.routes.js      # Customer API route definitions
+│   │   ├── customer.routes.js     # Customer endpoint routes
+│   │   └── product.routes.js      # Product endpoint routes
 │   ├── utils/
-│   │   └── generateToken.js        # JWT signing utility
-│   ├── .env                        # Local environment configuration (git-ignored)
-│   ├── .env.example                # Environment variable reference template
-│   ├── index.js                    # Express server entry point & MongoDB connection
-│   └── package.json                # Backend dependencies and scripts
-└── frontend/
-    ├── src/
-    │   ├── components/
-    │   │   └── Navbar.jsx          # Top navigation bar with ShopKart logo, Home link & Logout
-    │   ├── pages/
-    │   │   ├── Register.jsx        # Registration form (/register)
-    │   │   ├── Login.jsx           # Login form (/login)
-    │   │   └── Home.jsx            # Protected customer profile page (/home)
-    │   ├── services/
-    │   │   └── api.js              # Axios instance configured with withCredentials: true
-    │   ├── App.jsx                 # Main application router setup
-    │   ├── index.css               # Global application styling
-    │   └── main.jsx                # React DOM entry point
-    ├── index.html                  # HTML template
-    ├── vite.config.js              # Vite configuration
-    └── package.json                # Frontend dependencies and scripts
+│   │   └── generateToken.js       # JWT signing & HttpOnly cookie configuration
+│   ├── .env.example               # Backend environment configuration template
+│   ├── index.js                   # Express server entry point & MongoDB connection
+│   └── package.json               # Backend dependencies & scripts
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx         # Top navigation bar
+│   │   │   ├── ProductCard.jsx    # Product card preview component
+│   │   │   └── SearchBar.jsx      # Product search & category filter bar
+│   │   ├── pages/
+│   │   │   ├── Home.jsx           # Protected profile page (/home)
+│   │   │   ├── Login.jsx          # Customer login page (/login)
+│   │   │   ├── ProductDetails.jsx # Detailed product view (/products/:id)
+│   │   │   ├── Products.jsx       # Product catalog page (/products)
+│   │   │   └── Register.jsx       # Registration page (/register)
+│   │   ├── services/
+│   │   │   └── api.js             # Axios instance with withCredentials: true
+│   │   ├── App.jsx                # Router configuration
+│   │   ├── index.css              # Global application styles
+│   │   └── main.jsx               # React DOM entry point
+│   ├── .oxlintrc.json             # Oxlint linter rules
+│   ├── index.html                 # Single Page Application HTML shell
+│   ├── package.json               # Frontend dependencies & scripts
+│   └── vite.config.js             # Vite bundler configuration
+├── .env.example                   # Unified repository environment reference
+├── .gitignore                     # Git tracking exclusions
+├── LICENSE                        # MIT License
+└── README.md                      # Project landing documentation
 ```
 
 ---
 
-## Setup & Installation Instructions
+## 🚀 Getting Started
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/TheVicky1/ShopKart.git
-cd ShopKart
-```
+### Prerequisites
 
----
+- **Node.js**: `v18.0.0` or higher
+- **npm**: `v9.0.0` or higher
+- **MongoDB**: Local MongoDB server on `mongodb://127.0.0.1:27017` or Atlas cloud URI.
 
-### 2. Backend Setup (Lab 01)
+### Quickstart
 
-1. Navigate to the backend directory:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/TheVicky1/ShopKart.git
+   cd ShopKart
+   ```
+
+2. **Backend Setup**:
    ```bash
    cd backend
-   ```
-
-2. Install backend dependencies:
-   ```bash
    npm install
-   ```
-
-3. Create the environment configuration file:
-   Copy `.env.example` to `.env`:
-   ```bash
    cp .env.example .env
-   ```
-   Ensure `.env` contains:
-   ```env
-   PORT=5000
-   MONGO_URI=mongodb://127.0.0.1:27017/shopkart
-   JWT_SECRET=your_secret_key
-   ```
-
-4. Start the backend server:
-   ```bash
    node index.js
    ```
-   *(Server will connect to MongoDB and run on `http://localhost:5000`)*.
+   *(Server starts on `http://localhost:5000`)*.
 
----
-
-### 3. Frontend Setup (Lab 02)
-
-1. Open a new terminal and navigate to the frontend directory:
+3. **Frontend Setup**:
+   Open a second terminal:
    ```bash
    cd frontend
-   ```
-
-2. Install frontend dependencies:
-   ```bash
    npm install
-   ```
-
-3. Start the Vite development server:
-   ```bash
    npm run dev
    ```
-   *(Frontend app will run on `http://localhost:5173`)*.
+   *(Frontend app starts on `http://localhost:5173`)*.
 
 ---
 
-## Application User Flow
+## 📡 API Reference
 
-```text
-Registration Flow:
-/register → Fill Form (Name, Email, Password, Phone) → POST /customers/register → Redirect to /login
+All customer endpoints are mounted under `/customers`.
 
-Login Flow:
-/login → Enter Credentials → POST /customers/login → Backend sets HttpOnly 'token' cookie → Redirect to /home
-
-Protected Home Flow:
-/home → GET /customers/me (with Cookie) → Backend verifies JWT → Returns Profile Data → Render Welcome Card
-(If unauthenticated or 401 error → Redirect to /login)
-
-Logout Flow:
-Click Logout → POST /customers/logout → Backend clears 'token' cookie → Redirect to /login
-```
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/customers/register` | `POST` | Public | Registers a new customer account |
+| `/customers/login` | `POST` | Public | Verifies credentials & sets `HttpOnly` JWT cookie |
+| `/customers/me` | `GET` | Protected | Returns authenticated user profile data |
+| `/customers/logout` | `POST` | Protected | Clears `HttpOnly` cookie and invalidates session |
+| `/products` | `GET` | Public | Returns product catalog with search & category filters |
+| `/products/:id` | `GET` | Public | Returns individual product details |
 
 ---
 
-## API Documentation
+## 📖 Documentation Architecture
 
-All backend customer endpoints are prefixed with `/customers`.
+Explore deeper technical guides in the [`docs/`](docs/) directory:
 
-### 1. Customer Registration
-* **HTTP Method**: `POST`
-* **Endpoint**: `/customers/register`
-* **Access**: Public
-* **Request Body**:
-  ```json
-  {
-    "fullName": "Vicky Patel",
-    "email": "vicky@example.com",
-    "password": "password123",
-    "phone": "9876543210"
-  }
-  ```
-* **Success Response (`201 Created`)**:
-  ```json
-  {
-    "success": true,
-    "message": "Customer registered successfully",
-    "customer": {
-      "_id": "66d3a1b2c3d4e5f6a7b8c9d0",
-      "fullName": "Vicky Patel",
-      "email": "vicky@example.com",
-      "phone": "9876543210"
-    }
-  }
-  ```
+- 🏎️ **[Getting Started Guide](docs/GETTING_STARTED.md)** — Installation & environment setup.
+- 📐 **[Architecture Overview](docs/ARCHITECTURE.md)** — Sequence flow, database schema & component design.
+- 💻 **[Development Guide](docs/DEVELOPMENT.md)** — Commands, linting, and build optimization.
+- 🤝 **[Contributing Guidelines](docs/CONTRIBUTING.md)** — Contribution workflow and PR checklist.
+- 🔒 **[Security Policy](docs/SECURITY.md)** — Session security safeguards & vulnerability reporting.
+- ❓ **[FAQ](docs/FAQ.md)** — Technical FAQ and viva preparation notes.
 
 ---
 
-### 2. Customer Login
-* **HTTP Method**: `POST`
-* **Endpoint**: `/customers/login`
-* **Access**: Public
-* **Request Body**:
-  ```json
-  {
-    "email": "vicky@example.com",
-    "password": "password123"
-  }
-  ```
-* **Success Response (`200 OK`)**:
-  ```json
-  {
-    "success": true,
-    "message": "Login successful"
-  }
-  ```
-  *(Sets an `HttpOnly` cookie named `token` valid for 1 day).*
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](docs/CONTRIBUTING.md) to get started.
 
 ---
 
-### 3. Get Authenticated Profile
-* **HTTP Method**: `GET`
-* **Endpoint**: `/customers/me`
-* **Access**: Protected (Requires valid `token` cookie)
-* **Success Response (`200 OK`)**:
-  ```json
-  {
-    "_id": "66d3a1b2c3d4e5f6a7b8c9d0",
-    "fullName": "Vicky Patel",
-    "email": "vicky@example.com",
-    "phone": "9876543210",
-    "createdAt": "2026-09-03T07:14:48.355Z"
-  }
-  ```
+## 🔒 Security
+
+For vulnerability disclosures and cookie policy details, view our [Security Policy](docs/SECURITY.md).
 
 ---
 
-### 4. Customer Logout
-* **HTTP Method**: `POST`
-* **Endpoint**: `/customers/logout`
-* **Access**: Protected
-* **Success Response (`200 OK`)**:
-  ```json
-  {
-    "success": true,
-    "message": "Logged out successfully"
-  }
-  ```
-  *(Clears the `token` cookie).*
+## 📜 License
 
----
-
-## Security Practices Implemented
-
-* **Bcrypt Password Hashing**: Passwords are saved as bcrypt hashes using a salt factor of 10 (`bcrypt.hash()`). Plain-text passwords are never stored.
-* **Password Exclusion**: Passwords are excluded from database queries and API responses (`.select('-password')`).
-* **HttpOnly Cookie Storage**: JWT tokens are sent via `res.cookie('token', token, { httpOnly: true, maxAge: 86400000 })`. `httpOnly: true` prevents client-side scripts from reading session tokens, defending against XSS attacks.
-* **No Client Token Storage**: Frontend does not store JWT tokens in `localStorage` or `sessionStorage`.
-* **CORS Credentials Configuration**: Backend enables CORS with `origin: true` and `credentials: true`, allowing cross-origin cookie authentication.
-* **Protected Routes Guard**: Express `auth.middleware.js` verifies the JWT cookie on protected endpoints (`/customers/me`, `/customers/logout`).
-* **Environment Protection**: `.env` containing database secrets is ignored by Git (`.gitignore`).
-
----
-
-## Viva & Learning Notes
-
-* **What is React?**: A JavaScript library for building component-based user interfaces.
-* **Controlled Components**: Form elements whose values are tied to React state (`useState`) and updated via input handlers (`onChange`).
-* **`useState`**: React hook for maintaining local component state (e.g. form inputs, error messages, user details).
-* **`useEffect`**: React hook for executing side effects (e.g. calling `GET /customers/me` when the Home page mounts).
-* **`useNavigate`**: React Router hook used for client-side navigation between pages (e.g., redirecting to `/login` after register or logout).
-* **`withCredentials: true`**: Axios setting that ensures cross-origin requests send cookies along with HTTP requests.
-* **Why use HttpOnly Cookies over `localStorage`?**: `localStorage` is accessible by any client-side JavaScript, exposing tokens to Cross-Site Scripting (XSS). `HttpOnly` cookies are unreadable by JavaScript (`document.cookie`), keeping session tokens secure.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
