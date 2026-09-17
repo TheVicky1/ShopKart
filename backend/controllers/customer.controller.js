@@ -60,8 +60,7 @@ const registerCustomer = async (req, res) => {
         // 7. Catch any unexpected server errors
         return res.status(500).json({
             success: false,
-            message: 'Server error, please try again later.',
-            error: error.message
+            message: 'Server error, please try again later.'
         });
     }
 };
@@ -116,8 +115,7 @@ const loginCustomer = async (req, res) => {
         // 7. Catch any unexpected server errors
         return res.status(500).json({
             success: false,
-            message: 'Server error, please try again later.',
-            error: error.message
+            message: 'Server error, please try again later.'
         });
     }
 };
@@ -130,8 +128,7 @@ const getMyProfile = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: 'Server error, please try again later.',
-            error: error.message
+            message: 'Server error, please try again later.'
         });
     }
 };
@@ -151,8 +148,7 @@ const logoutCustomer = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: 'Server error, please try again later.',
-            error: error.message
+            message: 'Server error, please try again later.'
         });
     }
 };
