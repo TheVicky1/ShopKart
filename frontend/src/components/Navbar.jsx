@@ -24,6 +24,7 @@ function Navbar() {
       </div>
       <div className="navbar-menu">
         <Link to="/home" className="nav-item">Home</Link>
+        <Link to="/products" className="nav-item">Products</Link>
         <button onClick={handleLogout} className="logout-btn">
           Logout
         </button>
