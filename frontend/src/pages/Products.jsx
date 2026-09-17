@@ -9,10 +9,11 @@ function Products() {
   const [categories, setCategories] = useState(['Electronics', 'Clothing', 'Footwear', 'Home & Kitchen', 'Books']);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [sort, setSort] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Fetch products whenever search or category state changes
+  // Fetch products whenever search, category, or sort state changes
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -23,6 +24,7 @@ function Products() {
         const params = {};
         if (search.trim()) params.search = search.trim();
         if (category.trim()) params.category = category.trim();
+        if (sort.trim()) params.sort = sort.trim();
 
         const response = await getProducts(params);
 
@@ -43,7 +45,7 @@ function Products() {
     };
 
     fetchProducts();
-  }, [search, category]);
+  }, [search, category, sort]);
 
   return (
     <div>
@@ -55,13 +57,15 @@ function Products() {
           <p>Explore our wide range of products</p>
         </div>
 
-        {/* Search & Category Filter Section */}
+        {/* Search, Category & Sort Section */}
         <SearchBar
           search={search}
           setSearch={setSearch}
           category={category}
           setCategory={setCategory}
           categories={categories}
+          sort={sort}
+          setSort={setSort}
         />
 
         {/* Loading State */}

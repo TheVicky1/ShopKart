@@ -1,6 +1,6 @@
 import React from 'react';
 
-function SearchBar({ search, setSearch, category, setCategory, categories = [] }) {
+function SearchBar({ search, setSearch, category, setCategory, categories = [], sort, setSort }) {
   return (
     <div className="search-bar-container">
       <div className="search-input-group">
@@ -25,6 +25,18 @@ function SearchBar({ search, setSearch, category, setCategory, categories = [] }
               {cat}
             </option>
           ))}
+        </select>
+      </div>
+
+      <div className="sort-select-group">
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="category-select"
+        >
+          <option value="">Sort By: Default</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
         </select>
       </div>
     </div>
