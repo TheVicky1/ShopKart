@@ -1,18 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getWishlist } from '../services/api';
 
-function Navbar() {
+function Navbar({ wishlistCount }) {
   const navigate = useNavigate();
+  const [count, setCount] = useState(wishlistCount ?? 0);
+
+  useEffect(() => {
+    if (wishlistCount !== undefined) {
+      setCount(wishlistCount);
+    } else {
+      // Fetch wishlist count from backend if not provided as prop
+      getWishlist()
+        .then((res) => {
+          if (res.data && res.data.success) {
+            setCount(res.data.count);
+          }
+        })
+        .catch(() => {
+          // Unauthenticated or error -> fallback count 0
+        });
+    }
+  }, [wishlistCount]);
 
   const handleLogout = async () => {
     try {
-      // Call backend logout API to clear HttpOnly cookie
       await api.post('/customers/logout');
-      // Redirect to login page
       navigate('/login');
     } catch (err) {
-      // Navigate to login even if logout API fails or session expired
       navigate('/login');
     }
   };
@@ -25,6 +40,9 @@ function Navbar() {
       <div className="navbar-menu">
         <Link to="/home" className="nav-item">Home</Link>
         <Link to="/products" className="nav-item">Products</Link>
+        <Link to="/wishlist" className="nav-item nav-wishlist">
+          Wishlist {count > 0 && <span className="wishlist-badge">{count}</span>}
+        </Link>
         <button onClick={handleLogout} className="logout-btn">
           Logout
         </button>
