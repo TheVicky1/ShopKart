@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Define Customer Schema with Wishlist reference array
 const customerSchema = new mongoose.Schema({
     fullName: {
         type: String,
@@ -18,6 +19,13 @@ const customerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    // Lab 04: Wishlist array storing references to Product ObjectIds
+    wishlist: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now
