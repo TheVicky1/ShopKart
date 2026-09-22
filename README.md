@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# 🛍️ ShopKart — Full-Stack E-Commerce Application
+# 🛍️ ShopKart - Full-Stack E-Commerce Application
 
 **A Production-Style E-Commerce Platform Built Across Engineering Labs.**  
 *Secure JWT Auth · Dynamic Catalog Search & Sorting · Persistent MongoDB Wishlist Governance*
