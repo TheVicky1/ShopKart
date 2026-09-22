@@ -167,3 +167,143 @@ ShopKart/
 | `src/pages/Products.jsx` | **File** | Lab 03 | **Product Catalog Page**: Displays catalog grid, live search, category filter, and price sort dropdown. Handles **Loading**, **Error**, and **Empty** states. |
 | `src/pages/ProductDetails.jsx` | **File** | Lab 03 | **Product Details View (`/products/:id`)**: Extracts `:id` using `useParams()`, fetches details from `GET /products/:id`, and renders full product view. |
 | `src/pages/Wishlist.jsx` | **File** | Lab 04 | **Wishlist Page (`/wishlist`)**: Fetches `GET /wishlist`, renders dynamic wishlist cards, and manages **Loading**, **Empty** (`[ Browse Products ]`), and **Error** (`[ Try Again ]`) states. |
+
+---
+
+## 🔄 System Architecture & Data Flow Diagrams
+
+### **1. Authentication & Cookie Session Flow (Labs 1 & 2)**
+```text
+[User] ──► Submits Form (/login) ──► POST /customers/login ──► Compare Hash (bcrypt)
+                                                                       │
+                                                                       ▼
+[Browser] ◄── Set-Cookie: token=<JWT>; HttpOnly ◄── Generate Signed JWT (generateToken.js)
+    │
+    ▼ Navigates to /home
+GET /customers/me (Cookie auto-attached) ──► auth.middleware.js (protect)
+                                                   │
+                                                   ▼
+[User Dashboard] ◄── Return Customer Profile JSON ◄── Verify Signature & Find User
+```
+
+### **2. Product Catalog Search & Sorting Flow (Lab 03)**
+```text
+[User Types in SearchBar / Selects Category or Sort]
+       │
+       ▼ (State Change: search, category, sort)
+  Products.jsx useEffect() Triggers
+       │
+       ▼ (Axios call with params)
+  GET /products?search=keyboard&category=Electronics&sort=price_asc
+       │
+       ▼
+  backend/routes/product.routes.js ──► product.controller.js (getAllProducts)
+       │
+       ▼ (Dynamic MongoDB Query)
+  Product.find({ name: { $regex: 'keyboard', $options: 'i' }, category: 'Electronics' }).sort({ price: 1 })
+       │
+       ▼
+  Returns JSON: { success: true, count: N, products: [...] } ──► Renders ProductCard Grid via .map()
+```
+
+### **3. Wishlist Data Lifecycle & Referencing Flow (Lab 04)**
+```text
+[User Clicks ♡ Wishlist on ProductCard]
+       │
+       ▼ (Calls Axios API Service)
+  POST /wishlist/:productId (with HttpOnly JWT Cookie)
+       │
+       ▼
+  backend/routes/wishlist.routes.js ──► auth.middleware.js (protects & attaches req.user)
+       │
+       ▼
+  wishlist.controller.js (addToWishlist)
+       ├─► Check duplicate: customer.wishlist.includes(productId) ──► Yes? Return 409 Conflict
+       └─► No? customer.wishlist.push(productId) ──► Save in MongoDB ──► Return 200 OK
+       │
+       ▼
+[User Navigates to /wishlist]
+       │
+       ▼
+  GET /wishlist ──► Customer.findById(userId).populate({ path: 'wishlist', select: 'name price category image stock' })
+       │
+       ▼
+  Returns JSON: { success: true, count: N, wishlist: [ { _id: "...", name: "...", price: ... } ] }
+       │
+       ▼
+  Wishlist.jsx renders WishlistCard Grid dynamically via .map()
+```
+
+---
+
+## 🌐 API Reference Documentation
+
+### **Customer Authentication Endpoints (`/customers`)**
+
+| HTTP Method | Endpoint | Access | Request Payload | Success Status | Description |
+| :--- | :--- | :--- | :--- | :---: | :--- |
+| `POST` | `/customers/register` | Public | `{ fullName, email, password, phone }` | `201 Created` | Registers customer & hashes password via bcrypt. |
+| `POST` | `/customers/login` | Public | `{ email, password }` | `200 OK` | Verifies password & sets `HttpOnly` JWT cookie. |
+| `GET` | `/customers/me` | Protected | None *(Cookies auto-sent)* | `200 OK` | Returns authenticated customer profile data. |
+| `POST` | `/customers/logout` | Protected | None | `200 OK` | Clears `HttpOnly` token cookie. |
+
+---
+
+### **Product Catalog Endpoints (`/products`)**
+
+| HTTP Method | Endpoint | Access | Query Parameters / Body | Success Status | Description |
+| :--- | :--- | :--- | :--- | :---: | :--- |
+| `POST` | `/products` | Public | `{ name, description, price, category, image, stock }` | `201 Created` | Inserts a new product into MongoDB collection. |
+| `GET` | `/products` | Public | `search`, `category`, `sort` | `200 OK` | Returns products matching search regex, category, & price sort order. |
+| `GET` | `/products/:id` | Public | Path variable `:id` | `200 OK` | Returns single product details by MongoDB ObjectId. |
+
+---
+
+### **Wishlist Endpoints (`/wishlist`) — Lab 04**
+
+#### 1. Add Product to Wishlist
+- **Method & Endpoint**: `POST /wishlist/:productId`
+- **Access**: Protected *(Requires valid JWT cookie)*
+- **Response (`200 OK`)**:
+  ```json
+  { "success": true, "message": "Product added to wishlist" }
+  ```
+- **Error Responses**:
+  - `401 Unauthorized`: Missing or invalid auth cookie.
+  - `400 Bad Request`: Invalid MongoDB product ID format.
+  - `404 Not Found`: Product does not exist in database.
+  - `409 Conflict`: Product already exists in user's wishlist.
+
+#### 2. Get Current User's Wishlist
+- **Method & Endpoint**: `GET /wishlist`
+- **Access**: Protected *(Requires valid JWT cookie)*
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "count": 2,
+    "wishlist": [
+      {
+        "_id": "66d123abc456...",
+        "name": "Mechanical Keyboard",
+        "price": 2999,
+        "category": "Electronics",
+        "image": "https://images.unsplash.com/...",
+        "stock": 15
+      }
+    ]
+  }
+  ```
+
+#### 3. Remove Product from Wishlist
+- **Method & Endpoint**: `DELETE /wishlist/:productId`
+- **Access**: Protected *(Requires valid JWT cookie)*
+- **Response (`200 OK`)**:
+  ```json
+  { "success": true, "message": "Product removed from wishlist" }
+  ```
+- **Error Responses**:
+  - `401 Unauthorized`: Not authenticated.
+  - `400 Bad Request`: Invalid product ID format.
+  - `404 Not Found`: Product is not present in user's wishlist.
+
