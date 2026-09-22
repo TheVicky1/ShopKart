@@ -26,12 +26,6 @@
 - [Edge Cases & Error Handling](#-edge-cases--error-handling)
 - [Setup & Installation Instructions](#-setup--installation-instructions)
 - [🎓 Comprehensive Viva Examination Preparation Guide (60 Questions)](#-comprehensive-viva-examination-preparation-guide-60-questions)
-  - [Category 1: Web & REST API Architecture (Q1 – Q10)](#category-1-web--rest-api-architecture)
-  - [Category 2: Backend Development & Express.js (Q11 – Q20)](#category-2-backend-development--expressjs)
-  - [Category 3: MongoDB & Mongoose Referencing (Q21 – Q30)](#category-3-mongodb--mongoose-referencing)
-  - [Category 4: Frontend Development & React Hooks (Q31 – Q40)](#category-4-frontend-development--react-hooks)
-  - [Category 5: Authentication & Security (Q41 – Q50)](#category-5-authentication--security)
-  - [Category 6: ShopKart Project Specific Logic (Q51 – Q60)](#category-6-shopkart-project-specific-logic)
 
 ---
 
@@ -83,3 +77,93 @@ ShopKart is developed across modular engineering labs to replicate real-world en
 * **Routing**: React Router DOM (`v7.18.3`)
 * **HTTP Client**: Axios (`v1.20.0`) with `withCredentials: true`
 * **Styling**: Modern Custom CSS (Flexbox, Grid, Glassmorphism, Micro-animations)
+
+---
+
+## 📁 File & Directory Architecture Breakdown
+
+```text
+ShopKart/
+├── backend/
+│   ├── controllers/
+│   │   ├── customer.controller.js
+│   │   ├── product.controller.js
+│   │   └── wishlist.controller.js
+│   ├── middlewares/
+│   │   └── auth.middleware.js
+│   ├── models/
+│   │   ├── customer.model.js
+│   │   └── product.model.js
+│   ├── routes/
+│   │   ├── customer.routes.js
+│   │   ├── product.routes.js
+│   │   └── wishlist.routes.js
+│   ├── utils/
+│   │   └── generateToken.js
+│   ├── .env
+│   ├── .env.example
+│   ├── index.js
+│   └── package.json
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   ├── Navbar.jsx
+    │   │   ├── ProductCard.jsx
+    │   │   ├── SearchBar.jsx
+    │   │   └── WishlistCard.jsx
+    │   ├── pages/
+    │   │   ├── Home.jsx
+    │   │   ├── Login.jsx
+    │   │   ├── ProductDetails.jsx
+    │   │   ├── Products.jsx
+    │   │   ├── Register.jsx
+    │   │   └── Wishlist.jsx
+    │   ├── services/
+    │   │   └── api.js
+    │   ├── App.css
+    │   ├── App.jsx
+    │   ├── index.css
+    │   └── main.jsx
+    ├── index.html
+    ├── vite.config.js
+    └── package.json
+```
+
+---
+
+### 1. Backend Directory (`backend/`)
+
+| File / Folder Path | Type | Lab | Purpose & Architectural Overview |
+| :--- | :---: | :---: | :--- |
+| `index.js` | **File** | Labs 1-4 | **Express Server Entry Point**: Configures Express, CORS (`withCredentials: true`), body parsers, cookie parser, resilient MongoDB connection with In-Memory fallback, database seeding, and mounts API routes (`/customers`, `/products`, `/wishlist`). |
+| `.env` | **File** | Lab 01 | **Environment Secret Config**: Stores database connection strings (`MONGO_URI`), server `PORT`, and JWT signing secret (`JWT_SECRET`). *(Git-ignored)* |
+| `models/customer.model.js` | **File** | Labs 1 & 4 | **Customer Schema**: Defines fields for `fullName`, `email` (unique), `password`, `phone`, and `wishlist` array storing `mongoose.Schema.Types.ObjectId` references pointing to `Product`. |
+| `models/product.model.js` | **File** | Lab 03 | **Product Schema**: Defines product data blueprint: `name`, `description`, `price` (`min: 0.01`), `category`, `image`, `stock` (`min: 0`), and automatic `createdAt` timestamp. |
+| `controllers/customer.controller.js` | **File** | Labs 1 & 2 | **Customer Handlers**: `registerCustomer` (bcrypt hashing), `loginCustomer` (password comparison & JWT `HttpOnly` cookie setting), `getMyProfile` (authenticated customer data), and `logoutCustomer` (clears cookie). |
+| `controllers/product.controller.js` | **File** | Lab 03 | **Product Handlers**: `createProduct` (validates price/stock), `getAllProducts` (case-insensitive `$regex` search, category match, price sorting `price_asc`/`price_desc`), and `getProductById` (validates ObjectId & fetches details). |
+| `controllers/wishlist.controller.js` | **File** | Lab 04 | **Wishlist Handlers**: `addToWishlist` (validates ID, checks duplicate `409 Conflict`, pushes reference), `getWishlist` (uses `.populate()` to resolve full product objects), and `removeFromWishlist` (filters reference from user array). |
+| `routes/customer.routes.js` | **File** | Labs 1 & 2 | **Customer Routes**: Maps `/register` (POST), `/login` (POST), `/me` (GET, protected), and `/logout` (POST, protected). |
+| `routes/product.routes.js` | **File** | Lab 03 | **Product Routes**: Maps `/` (POST create, GET catalog list) and `/:id` (GET product details). |
+| `routes/wishlist.routes.js` | **File** | Lab 04 | **Wishlist Routes**: Maps `POST /:productId`, `GET /`, and `DELETE /:productId` protected by `protect` authentication middleware. |
+| `middlewares/auth.middleware.js` | **File** | Lab 02 | **JWT Protection Guard (`protect`)**: Extracts `req.cookies.token`, verifies JWT payload using `jwt.verify()`, attaches user object to `req.user`, or returns `401 Unauthorized`. |
+| `utils/generateToken.js` | **File** | Lab 01 | **JWT Signing Utility**: Signs a JSON Web Token with customer ID and secret key, setting expiration to 1 day (`1d`). |
+
+---
+
+### 2. Frontend Directory (`frontend/`)
+
+| File / Folder Path | Type | Lab | Purpose & Architectural Overview |
+| :--- | :---: | :---: | :--- |
+| `src/main.jsx` | **File** | Lab 02 | **React DOM Mounting Point**: Renders root `<App />` component inside `<div id="root"></div>` target using `ReactDOM.createRoot()`. |
+| `src/App.jsx` | **File** | Labs 2-4 | **Application Router**: Sets up `BrowserRouter` and maps client routes (`/login`, `/register`, `/home`, `/products`, `/products/:id`, `/wishlist`). |
+| `src/services/api.js` | **File** | Labs 2-4 | **Axios API Service**: Configured with `withCredentials: true`. Exposes helper functions: `getProducts`, `getProductById`, `addToWishlist`, `getWishlist`, and `removeFromWishlist`. |
+| `src/components/Navbar.jsx` | **File** | Labs 2-4 | **Header Navigation**: Navigation links (`Home | Products | Wishlist (N) | Logout`) featuring dynamic wishlist badge count. |
+| `src/components/ProductCard.jsx` | **File** | Labs 3 & 4 | **Product Card UI**: Displays product thumbnail, info, price, stock badge, View Details button, and interactive Wishlist toggle button (`♡ Wishlist` / `⏳ Saving...` / `♥ Saved`). |
+| `src/components/SearchBar.jsx` | **File** | Lab 03 | **Search & Filter Bar**: Controlled UI header with live search text input, category `<select>` filter, and price `<select>` sort dropdown. |
+| `src/components/WishlistCard.jsx` | **File** | Lab 04 | **Wishlist Item Card**: Displays saved product image, title, category, price, stock availability, **View Details** button, and **Remove ♥** button. |
+| `src/pages/Register.jsx` | **File** | Lab 02 | **Registration Page**: Controlled form collecting customer details (fullName, email, password, phone) posting to `/customers/register`. |
+| `src/pages/Login.jsx` | **File** | Lab 02 | **Login Page**: Form collecting credentials posting to `/customers/login`. Upon success, redirects user to `/home`. |
+| `src/pages/Home.jsx` | **File** | Lab 02 | **Protected User Dashboard**: Calls `GET /customers/me` on mount to display customer profile card. |
+| `src/pages/Products.jsx` | **File** | Lab 03 | **Product Catalog Page**: Displays catalog grid, live search, category filter, and price sort dropdown. Handles **Loading**, **Error**, and **Empty** states. |
+| `src/pages/ProductDetails.jsx` | **File** | Lab 03 | **Product Details View (`/products/:id`)**: Extracts `:id` using `useParams()`, fetches details from `GET /products/:id`, and renders full product view. |
+| `src/pages/Wishlist.jsx` | **File** | Lab 04 | **Wishlist Page (`/wishlist`)**: Fetches `GET /wishlist`, renders dynamic wishlist cards, and manages **Loading**, **Empty** (`[ Browse Products ]`), and **Error** (`[ Try Again ]`) states. |
