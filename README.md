@@ -1,37 +1,87 @@
-# ShopKart — Full-Stack E-Commerce Application
+<div id="top"></div>
 
-![ShopKart Banner](https://img.shields.io/badge/ShopKart-FullStack%20E--Commerce-blue?style=for-the-badge&logo=react)
-![NodeJS](https://img.shields.io/badge/Node.js-v18+-green?style=for-the-badge&logo=node.js)
-![ExpressJS](https://img.shields.io/badge/Express.js-v5.0-lightgrey?style=for-the-badge&logo=express)
-![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-emerald?style=for-the-badge&logo=mongodb)
-![React](https://img.shields.io/badge/React-v19-cyan?style=for-the-badge&logo=react)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+<div align="center">
 
-**ShopKart** is a production-style, full-stack e-commerce web application built progressively across engineering labs. It features secure customer authentication using **JSON Web Tokens (JWT)** stored in `HttpOnly` cookies, a dynamic **Product Discovery and Catalog System** with real-time regex search, category filtering, and price sorting, and a persistent **Wishlist Experience** powered by **MongoDB ObjectId Referencing** (`ref: 'Product'`) and **Mongoose `populate()`**.
+# 🛍️ ShopKart — Full-Stack E-Commerce Application
+
+**A Production-Style E-Commerce Platform Built Across Engineering Labs.**  
+*Secure JWT Auth · Dynamic Catalog Search & Sorting · Persistent MongoDB Wishlist Governance*
+
+<br />
+
+[![Node.js](https://img.shields.io/badge/Node.js-v18+-050505.svg?style=for-the-badge&logo=node.js&logoColor=green)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-v5.0-050505.svg?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-050505.svg?style=for-the-badge&logo=mongodb&logoColor=3ECF8E)](https://mongodb.com/)
+[![React](https://img.shields.io/badge/React-v19-050505.svg?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-v6.0-050505.svg?style=for-the-badge&logo=vite&logoColor=646CFF)](https://vitejs.dev/)
+[![JWT Auth](https://img.shields.io/badge/Auth-JWT_HttpOnly-050505.svg?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-d4af37.svg?style=for-the-badge)](LICENSE)
+
+<br />
+
+> 🌐 **Full-Stack Application Overview**: Built progressively across **Labs 01 – 04** featuring **JWT Cookie Security**, **MongoDB Schema Referencing**, **Express REST APIs**, and **React 19 SPA**.
+
+<br />
+
+[About](#about-shopkart) · [Quick Start](#quick-start) · [Lab Progression](#-engineering-lab-progression--feature-matrix) · [Architecture Breakdown](#-file--directory-architecture-breakdown) · [API Specs](#-api-reference-documentation) · [Viva Q&A Guide](#-comprehensive-viva-examination-preparation-guide-60-questions)
+
+</div>
 
 ---
 
-## 📋 Table of Contents
-- [Project Overview & Evolution](#-project-overview--evolution)
-- [Engineering Lab Progression & Feature Matrix](#-engineering-lab-progression--feature-matrix)
-- [Tech Stack](#-tech-stack)
-- [File & Directory Architecture Breakdown](#-file--directory-architecture-breakdown)
-  - [Backend Architecture](#1-backend-directory-backend)
-  - [Frontend Architecture](#2-frontend-directory-frontend)
-- [System Architecture & Data Flow Diagrams](#-system-architecture--data-flow-diagrams)
-- [API Reference Documentation](#-api-reference-documentation)
-  - [Customer Auth Endpoints (`/customers`)](#customer-authentication-endpoints-customers)
-  - [Product Catalog Endpoints (`/products`)](#product-catalog-endpoints-products)
-  - [Wishlist Endpoints (`/wishlist`)](#wishlist-endpoints-wishlist)
-- [Edge Cases & Error Handling](#-edge-cases--error-handling)
-- [Setup & Installation Instructions](#-setup--installation-instructions)
-- [🎓 Comprehensive Viva Examination Preparation Guide (60 Questions)](#-comprehensive-viva-examination-preparation-guide-60-questions)
+<div align="center">
+  <h2>About ShopKart</h2>
+</div>
+
+Modern e-commerce platforms require seamless integration between **secure user authentication**, **real-time product catalog search and filtering**, and **persistent user governance systems like Wishlists and Carts**.
+
+**ShopKart** is a production-style full-stack e-commerce web application developed across four modular engineering labs using **Node.js, Express.js, MongoDB (Mongoose), and React (Vite)**. It strictly avoids superficial client-side shortcuts by implementing server-verified JWT authorization, relational Mongoose schema population, and robust UI feedback loops.
+
+### 🌟 Foundational Principles
+
+1. **Security-First Session Management**: Authentication credentials rely on cryptographically signed **JSON Web Tokens (JWT)** stored in unscriptable `HttpOnly` cookies, eliminating Cross-Site Scripting (XSS) token theft.
+2. **Relational Database Integrity**: Wishlist and user relationships utilize **MongoDB `ObjectId` referencing** (`ref: 'Product'`) with server-side `.populate()` instead of fragile embedded snapshots.
+3. **Dynamic Catalog Discovery**: Dynamic regex-based search, multi-category filtering, and price sorting (`price_asc`, `price_desc`) implemented directly at the database query layer.
+4. **Reactive UI & State Resilience**: Built with React 19, controlled components, and explicit visual states for **Loading**, **Empty Data**, and **Network Error Handling**.
+5. **IDOR & Injection Immunity**: Protected endpoints dynamically extract user identity from `req.user._id` set by authentication middleware, blocking Insecure Direct Object Reference (IDOR) exploits.
 
 ---
 
-## 🚀 Project Overview & Evolution
+<div align="center">
+  <h2>Quick Start</h2>
+</div>
 
-ShopKart is developed across modular engineering labs to replicate real-world enterprise software development practices:
+### Prerequisites
+
+- **Node.js**: `v18.x` or higher
+- **npm**: `v9.x` or higher
+- **MongoDB**: Local instance running on `mongodb://127.0.0.1:27017` (or auto-fallback to In-Memory MongoDB)
+
+### Local Setup & Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/TheVicky1/ShopKart.git
+cd ShopKart
+
+# 2. Setup and launch Backend Server
+cd backend
+npm install
+npm run dev
+
+# 3. Setup and launch Frontend Client (in a new terminal)
+cd ../frontend
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser to access the ShopKart Frontend, and [http://localhost:5000](http://localhost:5000) for the Backend API.
+
+---
+
+<div align="center">
+  <h2>Engineering Lab Progression</h2>
+</div>
 
 - **Lab 01 — Customer Auth Backend**: Modeled database schemas using **Mongoose**, implemented password hashing with **bcrypt**, generated **JWT tokens**, stored credentials securely using **`HttpOnly` cookies**, and built protected profile endpoints (`GET /customers/me`).
 - **Lab 02 — Customer Auth Frontend**: Built a client-side Single Page Application (SPA) in **React (Vite)** with controlled components, client-side routing via **React Router DOM**, centralized API communication via **Axios**, and session persistence.
@@ -42,6 +92,7 @@ ShopKart is developed across modular engineering labs to replicate real-world en
   - Created a dynamic React Wishlist Page (`/wishlist`), Wishlist Card components, Navbar badge count, and UI states (**Loading**, **Empty** with `[ Browse Products ]`, and **Error** with `[ Try Again ]`).
 
 ---
+
 
 ## 📊 Engineering Lab Progression & Feature Matrix
 
