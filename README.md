@@ -581,8 +581,23 @@ npm run dev
 
 ---
 
+## ✅ Quick Verification & Audit Checklist
+
+| Requirement / Module | Verification Status | Verification Command / Location |
+| :--- | :---: | :--- |
+| **Lab 01 & 02 Auth APIs** | ✅ PASSED | `POST /customers/register`, `POST /customers/login`, `GET /customers/me` |
+| **Lab 03 Catalog Search & Sort** | ✅ PASSED | `GET /products?search=&category=&sort=price_asc\|price_desc` |
+| **Lab 04 Wishlist ObjectId Schema** | ✅ PASSED | `backend/models/customer.model.js` (`ref: 'Product'`) |
+| **Lab 04 Protected Wishlist APIs** | ✅ PASSED | `POST /wishlist/:productId`, `GET /wishlist`, `DELETE /wishlist/:productId` |
+| **Lab 04 React Wishlist Page** | ✅ PASSED | `frontend/src/pages/Wishlist.jsx` (Loading, Empty, Error & Content states) |
+| **Lab 04 Viva Q&A Guide** | ✅ PASSED | 60 Questions & Answers across 6 categories in `README.md` |
+
+---
+
 ## 📜 License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is open-source and available under the [MIT License](LICENSE).
 
+---
 
+*Built with ❤️ for Web Development Lab Course — ShopKart E-Commerce.*
