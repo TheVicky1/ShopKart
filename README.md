@@ -307,3 +307,282 @@ GET /customers/me (Cookie auto-attached) ──► auth.middleware.js (protect)
   - `400 Bad Request`: Invalid product ID format.
   - `404 Not Found`: Product is not present in user's wishlist.
 
+---
+
+## 🚨 Edge Cases & Error Handling Matrix
+
+| Scenario / Edge Case | System Behaviour & Status Code | User Feedback Experience |
+| :--- | :--- | :--- |
+| **Product Not Found** | HTTP `404 Not Found` | Displays `"Product not found"` error banner. |
+| **Invalid ObjectId Format** | HTTP `400 Bad Request` | Validated via `mongoose.Types.ObjectId.isValid()`. |
+| **Unauthenticated User Action** | HTTP `401 Unauthorized` | Automatically redirects user to `/login`. |
+| **Duplicate Wishlist Add** | HTTP `409 Conflict` | Returns `"Product already in wishlist"`, preventing duplicates. |
+| **Removal of Absent Item** | HTTP `404 Not Found` | Returns `"Product not in wishlist"`. |
+| **Empty Wishlist Array** | HTTP `200 OK` (`count: 0`) | Renders Empty State UI (`"Your wishlist is empty ❤️"` + `Browse Products`). |
+| **Network / Server Error** | HTTP `500 Internal Server Error` | Renders Error State UI (`"Unable to load wishlist"` + `Try Again`). |
+
+---
+
+## ⚡ Setup & Installation Instructions
+
+### 1. Clone & Install Dependencies
+```bash
+git clone https://github.com/TheVicky1/ShopKart.git
+cd ShopKart/backend
+npm install
+cd ../frontend
+npm install
+```
+
+### 2. Start Backend Server
+```bash
+cd backend
+node index.js
+```
+*(Runs on `http://localhost:5000` with automatic in-memory MongoDB fallback and product seeding)*
+
+### 3. Start Frontend Dev Server
+```bash
+cd frontend
+npm run dev
+```
+*(Runs on `http://localhost:5173`)*
+
+---
+
+## 🎓 Comprehensive Viva Examination Preparation Guide (60 Questions)
+
+---
+
+### Category 1: Web & REST API Architecture (Q1 – Q10)
+
+#### Q1: What is a RESTful API and what are its core architectural constraints?
+> **Answer:** REST (Representational State Transfer) is an architectural style for designing stateless web APIs. Core constraints include statelessness (server stores no client context), client-server separation, uniform interface (HTTP verbs `GET`, `POST`, `PUT`, `DELETE`), resource identification via URIs, and cacheability.
+
+#### Q2: What is the difference between HTTP `GET`, `POST`, `PUT`, and `DELETE`?
+> **Answer:**
+> - `GET`: Retrieves resources without modifying server state (safe and idempotent).
+> - `POST`: Creates a new resource on the server.
+> - `PUT`: Replaces an existing resource or creates it if it doesn't exist.
+> - `DELETE`: Removes a resource from the server.
+
+#### Q3: What is the difference between URL Path Parameters and Query Parameters?
+> **Answer:**
+> - **Path Parameters (`/products/:id`)**: Uniquely identify a specific resource in the hierarchy.
+> - **Query Parameters (`/products?category=Electronics&sort=price_asc`)**: Filter, sort, or paginate a collection of resources.
+
+#### Q4: What do HTTP Status Codes 200, 201, 400, 401, 404, 409, and 500 represent?
+> **Answer:**
+> - `200 OK`: Request succeeded.
+> - `201 Created`: Resource successfully created.
+> - `400 Bad Request`: Invalid client input or malformed syntax.
+> - `401 Unauthorized`: Missing or invalid authentication token.
+> - `404 Not Found`: Resource or URI does not exist.
+> - `409 Conflict`: Request conflicts with current database state (e.g. duplicate item).
+> - `500 Internal Server Error`: Unhandled server exception.
+
+#### Q5: What is CORS and why is it necessary in web applications?
+> **Answer:** CORS (Cross-Origin Resource Sharing) is a browser security mechanism that blocks web pages served from one domain (origin) from requesting APIs on a different domain. In ShopKart, the frontend runs on port `5173` and backend on port `5000`. Enabling CORS on Express allows cross-domain HTTP requests and cookies.
+
+#### Q6: What does `withCredentials: true` do in Axios?
+> **Answer:** By default, browsers omit cookies during cross-origin HTTP requests. Setting `withCredentials: true` instructs Axios to include `HttpOnly` session cookies in cross-origin requests.
+
+#### Q7: What is JSON and why is it used for client-server communication?
+> **Answer:** JSON (JavaScript Object Notation) is a lightweight, language-independent text format for data interchange. It parses natively into JavaScript objects (`JSON.parse()`).
+
+#### Q8: What is statelessness in REST APIs?
+> **Answer:** Statelessness means each HTTP request must contain all necessary authentication data (e.g., in a cookie or header). The server stores no session state about previous requests.
+
+#### Q9: What is the difference between synchronous and asynchronous code execution in JavaScript?
+> **Answer:** Synchronous code executes sequentially, blocking subsequent execution until finished. Asynchronous code allows non-blocking execution (e.g. database queries, timers) by returning promises handled via `async/await` or callbacks.
+
+#### Q10: What is an API Contract?
+> **Answer:** An API contract defines the agreed-upon interface between frontend and backend, specifying endpoints, HTTP methods, request payloads, headers, response status codes, and error formats.
+
+---
+
+### Category 2: Backend Development & Express.js (Q11 – Q20)
+
+#### Q11: What is Node.js and how does its Event Loop work?
+> **Answer:** Node.js is an open-source JavaScript runtime built on Chrome's V8 engine. Its single-threaded Event Loop handles asynchronous I/O operations non-blockingly by delegating long tasks to worker threads and executing callbacks when complete.
+
+#### Q12: What is Express.js middleware and how does `next()` operate?
+> **Answer:** Middleware functions have access to `req`, `res`, and `next`. They perform tasks (like auth checking or JSON parsing) and call `next()` to pass control to the next handler in the stack.
+
+#### Q13: What is the Model-View-Controller (MVC) architectural pattern?
+> **Answer:**
+> - **Model**: Defines database schemas and rules (`customer.model.js`).
+> - **View**: Renders UI components on frontend (`Products.jsx`).
+> - **Controller**: Handles HTTP requests, business logic, and database operations (`product.controller.js`).
+
+#### Q14: What does `express.json()` middleware do?
+> **Answer:** Parses incoming JSON request payloads and populates `req.body` with JavaScript objects.
+
+#### Q15: Why use environment variables via `.env` and `dotenv`?
+> **Answer:** Keeps sensitive credentials (database URIs, ports, JWT secrets) out of source code and Git repositories.
+
+#### Q16: What is `cookie-parser` middleware used for in Express?
+> **Answer:** Extracts incoming HTTP request cookies and populates `req.cookies`, allowing middleware to read JWT session tokens (`req.cookies.token`).
+
+#### Q17: How does error handling work in async Express controllers?
+> **Answer:** Async controllers wrap database operations in `try...catch` blocks to catch runtime exceptions and return structured HTTP error responses (e.g., 500) without crashing the server process.
+
+#### Q18: What is `router.use()` vs `app.use()` in Express?
+> **Answer:** `app.use()` mounts middleware globally on the main application object. `router.use()` mounts middleware locally on a isolated Express Router instance (`product.routes.js`).
+
+#### Q19: Why return HTTP `400 Bad Request` when `ObjectId.isValid()` fails?
+> **Answer:** Passing malformed ID strings directly into Mongoose triggers cast exceptions. Validating first allows returning clean, immediate `400 Bad Request` error responses.
+
+#### Q20: What is in-memory database fallback (`mongodb-memory-server`)?
+> **Answer:** A developer convenience fallback that starts a temporary, local MongoDB server in memory if no external MongoDB instance is running, ensuring backend APIs work seamlessly anywhere.
+
+---
+
+### Category 3: MongoDB & Mongoose Referencing (Q21 – Q30)
+
+#### Q21: What is MongoDB and how does it differ from SQL databases?
+> **Answer:** MongoDB is a NoSQL, document-oriented database storing data in flexible BSON documents. Unlike SQL databases (tables, rows, joins), MongoDB is schema-flexible and scales horizontally.
+
+#### Q22: What is Mongoose and why do we use it with Node.js?
+> **Answer:** Mongoose is an Object Data Modeling (ODM) library for MongoDB that provides schema validation, type casting, query building, and document hooks.
+
+#### Q23: Why store Product ObjectIds in the Wishlist array instead of full Product objects?
+> **Answer:** Storing `ObjectId` references maintains **Data Normalization**. The `Product` collection remains the single source of truth. Updating a product's price, stock, or image automatically reflects across all wishlists without duplicating or syncing stale data.
+
+#### Q24: What does `ref: "Product"` in `customer.model.js` do?
+> **Answer:** Specifies the target model name associated with stored `ObjectId`s, enabling Mongoose `.populate()` to dynamically swap `ObjectId` strings for actual `Product` document objects.
+
+#### Q25: What is the difference between Embedding and Referencing in MongoDB?
+> **Answer:**
+> - **Embedding**: Storing child documents directly inside parent documents. Best for 1-to-few private relationships.
+> - **Referencing**: Storing `ObjectId` pointers to another collection. Best for many-to-many relationships where entities are shared and updated independently (like Products).
+
+#### Q26: How does Mongoose `.populate()` work in `getWishlist`?
+> **Answer:** `.populate({ path: 'wishlist', select: 'name price category image stock' })` executes a secondary query to resolve `ObjectId` references in `customer.wishlist` into populated product objects before returning the response.
+
+#### Q27: How do Mongoose schema validations work in `product.model.js`?
+> **Answer:** Validations enforce rules before saving: `required: true` prevents missing fields, `min: 0.01` ensures positive prices, and `min: 0` prevents negative stock counts.
+
+#### Q28: What is MongoDB `_id` and what type is it?
+> **Answer:** `_id` is a 12-byte unique identifier automatically assigned to documents as a primary key (`ObjectId`).
+
+#### Q29: How are duplicate wishlist entries prevented in the backend?
+> **Answer:** The controller checks if `productId` already exists in `customer.wishlist` using `customer.wishlist.some(id => id.toString() === productId)`. If present, it returns an HTTP `409 Conflict` status code.
+
+#### Q30: What is MongoDB `$regex` operator used for?
+> **Answer:** Performs regular expression pattern matching on string fields for case-insensitive text search (`query.name = { $regex: safeSearch, $options: 'i' }`).
+
+---
+
+### Category 4: Frontend Development & React Hooks (Q31 – Q40)
+
+#### Q31: What is React and what are its primary advantages?
+> **Answer:** React is a component-based UI library. Key advantages include declarative rendering, fast performance via Virtual DOM, unidirectional data flow, and reusable components.
+
+#### Q32: What is the Virtual DOM and how does reconciliation work?
+> **Answer:** The Virtual DOM is an in-memory representation of the browser DOM. When state changes, React compares the new Virtual DOM tree against the previous tree ("reconciliation") and updates only changed nodes in the real DOM.
+
+#### Q33: What is the difference between State and Props?
+> **Answer:**
+> - **State**: Local data managed internally within a component using `useState`. State updates trigger re-renders.
+> - **Props**: Read-only properties passed down from parent to child components.
+
+#### Q34: How does `useState` work?
+> **Answer:** Returns an array containing the current state value and an updater function (`const [wishlist, setWishlist] = useState([])`). Calling the updater function re-renders the component.
+
+#### Q35: How does `useEffect` work and what is its dependency array?
+> **Answer:** Performs side effects (like API fetching). The dependency array controls execution: empty `[]` runs once on mount; `[search, category]` runs on mount and whenever listed state variables change.
+
+#### Q36: How does `.map()` help render lists in React, and why is `key` required?
+> **Answer:** `.map()` transforms array data into JSX elements. The `key` prop provides a unique identity for each node, enabling React to track and update list items efficiently.
+
+#### Q37: How does `useParams` work in `ProductDetails.jsx`?
+> **Answer:** Extracts dynamic route parameters from URL paths (e.g. `const { id } = useParams()` extracts the `:id` path variable from `/products/:id`).
+
+#### Q38: How does `useNavigate` work?
+> **Answer:** Provides a function to trigger client-side page navigation programmatically (e.g., `navigate('/login')`).
+
+#### Q39: What are Controlled Components in React forms?
+> **Answer:** Form inputs whose value is bound to state (`value={search}`) and updated explicitly via `onChange` handlers, making React state the single source of truth.
+
+#### Q40: Why should the Wishlist page fetch from the backend instead of using local component state?
+> **Answer:** The wishlist is a **persistent feature**. Storing wishlist items only in local React state causes saved items to disappear on page refreshes or device switches. Fetching from the backend ensures data persistence.
+
+---
+
+### Category 5: Authentication & Security (Q41 – Q50)
+
+#### Q41: How does JWT authentication work?
+> **Answer:** JSON Web Tokens transmit signed claims between client and server. Upon login, the server signs a token containing the user's ID. Subsequent requests include this token to verify authentication.
+
+#### Q42: Why store JWT in `HttpOnly` Cookies instead of `localStorage`?
+> **Answer:** `localStorage` is accessible to client-side JavaScript, exposing session tokens to Cross-Site Scripting (XSS) theft. `HttpOnly` cookies are unreadable by JavaScript (`document.cookie`), keeping tokens safe from XSS extraction.
+
+#### Q43: How does `bcrypt` hash passwords safely?
+> **Answer:** `bcrypt` applies a cryptographic salt and configurable work factor to password hashes, making brute-force dictionary attacks computationally expensive.
+
+#### Q44: Why should passwords never be returned in API responses?
+> **Answer:** Exposing password hashes risks credential leakage through network logs and client inspection. Passwords are excluded from database queries using `.select('-password')`.
+
+#### Q45: What is Cross-Site Scripting (XSS) and how is it prevented?
+> **Answer:** XSS occurs when malicious scripts execute in a user's browser. Prevention includes using `HttpOnly` cookies, sanitizing input, and React's automatic JSX string escaping.
+
+#### Q46: What is Cross-Site Request Forgery (CSRF)?
+> **Answer:** CSRF tricks an authenticated user's browser into executing unintended requests. Mitigated by strict CORS configurations, `SameSite` cookie flags, and custom headers.
+
+#### Q47: Why should wishlist APIs never accept `userId` from the request body or URL path (`/wishlist/:userId`)?
+> **Answer:** Accepting `userId` introduces an **Insecure Direct Object Reference (IDOR)** vulnerability. A malicious user could pass someone else's ID to view or mutate another user's wishlist. Identity must always come from `req.user._id` set by `protect` middleware.
+
+#### Q48: How does `auth.middleware.js` protect backend routes?
+> **Answer:** Reads `req.cookies.token`. If missing, returns `401`. If present, verifies JWT signature, fetches user document from MongoDB, attaches it to `req.user`, and calls `next()`.
+
+#### Q49: What is the purpose of salt in password hashing?
+> **Answer:** A salt is a random string added to passwords before hashing to ensure identical plain-text passwords produce distinct hashes, defending against pre-computed Rainbow Table attacks.
+
+#### Q50: What is the role of CORS credentials setting?
+> **Answer:** `credentials: true` allows cross-origin requests to transmit credentials (cookies, authorization headers).
+
+---
+
+### Category 6: ShopKart Project Specific Logic (Q51 – Q60)
+
+#### Q51: What are the three UI states on the Wishlist Page (`Wishlist.jsx`) and why are they needed?
+> **Answer:**
+> 1. **Loading State (`"Loading your wishlist..."`)**: Provides visual feedback while async requests complete.
+> 2. **Empty State (`"Your wishlist is empty ❤️"` + `[ Browse Products ]`)**: Guides users when `wishlist.length === 0`.
+> 3. **Error State (`"Unable to load wishlist"` + `[ Try Again ]`)**: Handles network failures gracefully.
+
+#### Q52: How does the Wishlist toggle action work on `ProductCard.jsx`?
+> **Answer:** Manages localized `inWishlist` state. Clicking the heart button calls `addToWishlist()` if unsaved (updates state to `♥ Saved`) or `removeFromWishlist()` if saved (updates state to `♡ Wishlist`), preventing duplicate clicks via a `saving` state.
+
+#### Q53: How is the Navbar wishlist badge count kept in sync?
+> **Answer:** `Navbar.jsx` receives `wishlistCount` as a prop or fetches `GET /wishlist` on mount, displaying a styled numerical badge (`Wishlist (N)`).
+
+#### Q54: What happens when a non-authenticated user clicks `♡ Wishlist`?
+> **Answer:** The API call returns HTTP `401 Unauthorized`. The catch block intercepts `401` and redirects the user to `/login`.
+
+#### Q55: Why is product creation (`POST /products`) an open endpoint in Lab 03?
+> **Answer:** Lab 03 focuses on product schema modeling and catalog querying. Admin role-based authorization will be added in subsequent labs.
+
+#### Q56: What happens if an image URL fails to load in `ProductCard.jsx`?
+> **Answer:** `onError={(e) => e.target.src = 'placeholder...'}` intercepts broken image URLs and seamlessly replaces them with a fallback placeholder.
+
+#### Q57: How does price sorting work in `getAllProducts`?
+> **Answer:** Reads `req.query.sort`. If `'price_asc'`, applies `.sort({ price: 1 })`; if `'price_desc'`, applies `.sort({ price: -1 })`.
+
+#### Q58: Why separate API service calls into `services/api.js`?
+> **Answer:** Encapsulates Axios configurations, base URLs, and endpoint definitions in one central module, keeping UI components clean and decoupled.
+
+#### Q59: How does `removeFromWishlist` filter items in Mongoose?
+> **Answer:** Filters out the target `productId` from `customer.wishlist` array (`customer.wishlist.filter(id => id.toString() !== productId)`) and saves the customer document.
+
+#### Q60: What happens when an empty wishlist is returned from backend?
+> **Answer:** Returns `{ success: true, count: 0, wishlist: [] }`. `Wishlist.jsx` evaluates `wishlist.length === 0` and renders the Empty State UI with a `[ Browse Products ]` button.
+
+---
+
+## 📜 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+
